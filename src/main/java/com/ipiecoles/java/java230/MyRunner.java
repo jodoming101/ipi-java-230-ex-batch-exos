@@ -2,8 +2,10 @@ package com.ipiecoles.java.java230;
 
 import com.ipiecoles.java.java230.exceptions.BatchException;
 import com.ipiecoles.java.java230.model.Employe;
+import com.ipiecoles.java.java230.model.Manager;
 import com.ipiecoles.java.java230.repository.EmployeRepository;
 import com.ipiecoles.java.java230.repository.ManagerRepository;
+import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +18,6 @@ import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
@@ -90,9 +91,6 @@ public class MyRunner implements CommandLineRunner {
             if (!splitLigne[0].matches(REGEX_MATRICULE)) {
                 throw new BatchException("La chaîne " + splitLigne[0] + " ne respecte pas l'expression régulière ^[MTC][0-9]{5}$");
             }
-            processManager(ligne);
-            processCommercial(ligne);
-            processTechnicien(ligne);
             String date = splitLigne[3];
             try {
                 DateTimeFormat.forPattern("dd/MM/yyyy").parseLocalDate(date);
@@ -105,6 +103,9 @@ public class MyRunner implements CommandLineRunner {
             } catch (Exception e) {
                 throw new BatchException(salaire + " n'est pas un nombre valide pour un salaire");
             }
+            processManager(ligne);
+            processCommercial(ligne);
+            processTechnicien(ligne);
         }
     }
 
@@ -145,6 +146,13 @@ public class MyRunner implements CommandLineRunner {
             if (splitLigneManager.length != NB_CHAMPS_MANAGER) {
                 throw new BatchException("La ligne manager ne contient pas 5 éléments mais " + splitLigneManager.length);
             }
+            String nomManager = splitLigneManager[1];
+            String prenomManager = splitLigneManager[2];
+            String matriculeManager = splitLigneManager[0];
+            LocalDate dateEmbauche = DateTimeFormat.forPattern("dd/MM/yyyy").parseLocalDate(splitLigneManager[3]);
+            Double salaireManager = Double.parseDouble(splitLigneManager[4]);
+            Manager m = new Manager(nomManager, prenomManager, matriculeManager, dateEmbauche, salaireManager);
+            managerRepository.save(m);
         }
     }
 
