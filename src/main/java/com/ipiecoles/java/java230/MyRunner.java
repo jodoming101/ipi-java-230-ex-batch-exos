@@ -105,7 +105,6 @@ public class MyRunner implements CommandLineRunner {
             } catch (Exception e) {
                 throw new BatchException(salaire + " n'est pas un nombre valide pour un salaire");
             }
-
         }
     }
 
@@ -172,10 +171,10 @@ public class MyRunner implements CommandLineRunner {
             if (Integer.parseInt(gradeTechnicien) < 1 || Integer.parseInt(gradeTechnicien) > 5) {
                 throw new BatchException("Le grade doit être compris entre 1 et 5 : " + gradeTechnicien + ", technicien : Technicien{grade=null} Employe{nom='null', prenom='null', matricule='null', dateEmbauche=null, salaire=1480.27}");
             }
-            try {
-
+            String managerTechnicien = splitLigneTechnicien[6];
+            if (managerRepository.findByMatricule(managerTechnicien) == null) {
+                throw new BatchException("Le manager de matricule " + managerTechnicien + " n'a pas été trouvé dans le fichier ou en base de données");
             }
         }
     }
-
 }
