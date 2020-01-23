@@ -1,10 +1,14 @@
 package com.ipiecoles.java.java230;
 
 import com.ipiecoles.java.java230.exceptions.BatchException;
+import com.ipiecoles.java.java230.model.Commercial;
 import com.ipiecoles.java.java230.model.Employe;
 import com.ipiecoles.java.java230.model.Manager;
+import com.ipiecoles.java.java230.model.Technicien;
+import com.ipiecoles.java.java230.repository.CommercialRepository;
 import com.ipiecoles.java.java230.repository.EmployeRepository;
 import com.ipiecoles.java.java230.repository.ManagerRepository;
+import com.ipiecoles.java.java230.repository.TechnicienRepository;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +48,12 @@ public class MyRunner implements CommandLineRunner {
 
     @Autowired
     private ManagerRepository managerRepository;
+
+    @Autowired
+    private CommercialRepository commercialRepository;
+
+    @Autowired
+    private TechnicienRepository technicienRepository;
 
     private List<Employe> employes = new ArrayList<Employe>();
 
@@ -132,6 +142,15 @@ public class MyRunner implements CommandLineRunner {
             } catch (Exception e) {
                 throw new BatchException("La performance du commercial est incorrecte : " + PerfCommercial);
             }
+            String nomCommercial = splitLigneCommercial[1];
+            String prenomCommercial = splitLigneCommercial[2];
+            String matriculeCommercial = splitLigneCommercial[0];
+            LocalDate dateEmbauche = DateTimeFormat.forPattern("dd/MM/yyyy").parseLocalDate(splitLigneCommercial[3]);
+            Double salaireCommercial = Double.parseDouble(splitLigneCommercial[4]);
+            Double caCom = Double.parseDouble(CaCommercial);
+            Integer perfCom = Integer.parseInt(PerfCommercial);
+            Commercial c = new Commercial(nomCommercial, prenomCommercial, matriculeCommercial, dateEmbauche, salaireCommercial, caCom, perfCom);
+            employes.add(c);
         }
     }
 
@@ -152,7 +171,7 @@ public class MyRunner implements CommandLineRunner {
             LocalDate dateEmbauche = DateTimeFormat.forPattern("dd/MM/yyyy").parseLocalDate(splitLigneManager[3]);
             Double salaireManager = Double.parseDouble(splitLigneManager[4]);
             Manager m = new Manager(nomManager, prenomManager, matriculeManager, dateEmbauche, salaireManager);
-            managerRepository.save(m);
+            employes.add(m);
         }
     }
 
@@ -170,19 +189,26 @@ public class MyRunner implements CommandLineRunner {
             if (!splitLigneTechnicien[6].matches(REGEX_MATRICULE_MANAGER)) {
                 throw new BatchException("La chaine " + splitLigneTechnicien[6] + " ne respecte pas l'expression régulière ^M[0-9]{5}$");
             }
-            String gradeTechnicien = splitLigneTechnicien[5];
             try {
-                Integer.parseInt(gradeTechnicien);
+                Integer.parseInt(splitLigneTechnicien[5]);
             } catch (Exception e) {
-                throw new BatchException("Le grade du technicien est incorrect : " + gradeTechnicien);
+                throw new BatchException("Le grade du technicien est incorrect : " + splitLigneTechnicien[5]);
             }
-            if (Integer.parseInt(gradeTechnicien) < 1 || Integer.parseInt(gradeTechnicien) > 5) {
-                throw new BatchException("Le grade doit être compris entre 1 et 5 : " + gradeTechnicien + ", technicien : Technicien{grade=null} Employe{nom='null', prenom='null', matricule='null', dateEmbauche=null, salaire=1480.27}");
+            if (Integer.parseInt(splitLigneTechnicien[5]) < 1 || Integer.parseInt(splitLigneTechnicien[5]) > 5) {
+                throw new BatchException("Le grade doit être compris entre 1 et 5 : " + splitLigneTechnicien[5] + ", technicien : Technicien{grade=null} Employe{nom='null', prenom='null', matricule='null', dateEmbauche=null, salaire=1480.27}");
             }
             String managerTechnicien = splitLigneTechnicien[6];
             if (managerRepository.findByMatricule(managerTechnicien) == null) {
                 throw new BatchException("Le manager de matricule " + managerTechnicien + " n'a pas été trouvé dans le fichier ou en base de données");
             }
+            String nomTechnicien = splitLigneTechnicien[1];
+            String prenomTechnicien = splitLigneTechnicien[2];
+            String matriculeTechnicien = splitLigneTechnicien[0];
+            LocalDate dateEmbauche = DateTimeFormat.forPattern("dd/MM/yyyy").parseLocalDate(splitLigneTechnicien[3]);
+            Double salaireTechnicien = Double.parseDouble(splitLigneTechnicien[4]);
+            Integer gradeTechnicien = Integer.parseInt(splitLigneTechnicien[5]);
+            Technicien t = new Technicien(nomTechnicien, prenomTechnicien, matriculeTechnicien, dateEmbauche, salaireTechnicien, gradeTechnicien);
+            employes.add(t);
         }
     }
 }
